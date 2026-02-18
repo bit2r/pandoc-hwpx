@@ -810,6 +810,106 @@ local function render_cell_content(cell_blocks, cell_width)
   return table.concat(cell_parts, '\n')
 end
 
+-- Parse OpenXML <w:tbl> from gt output into HWPX <hp:tbl>
+local function parse_openxml_table(xml_str)
+  -- Extract rows: split by <w:tr> ... </w:tr>
+  local rows = {}
+  for tr_content in xml_str:gmatch('<w:tr[^>]*>(.-)</w:tr>') do
+    local cells = {}
+    for tc_content in tr_content:gmatch('<w:tc>(.-)</w:tc>') do
+      -- Extract text: collect all <w:t> content
+      local texts = {}
+      for t_text in tc_content:gmatch('<w:t[^>]*>([^<]*)</w:t>') do
+        texts[#texts+1] = t_text
+      end
+      local cell_text = table.concat(texts, '')
+      -- Check for gridSpan (colspan)
+      local colspan = 1
+      local gs = tc_content:match('<w:gridSpan w:val="(%d+)"')
+      if gs then colspan = tonumber(gs) end
+      cells[#cells+1] = { text = cell_text, colspan = colspan }
+    end
+    if #cells > 0 then
+      rows[#rows+1] = cells
+    end
+  end
+
+  if #rows == 0 then return nil end
+
+  -- Determine column count from first row
+  local num_cols = 0
+  for _, cell in ipairs(rows[1]) do
+    num_cols = num_cols + cell.colspan
+  end
+  if num_cols == 0 then num_cols = 1 end
+
+  local tbl_id = unique_id()
+  local row_cnt = #rows
+  local col_cnt = num_cols
+
+  -- Calculate column widths (equal distribution)
+  local page_width = 42520
+  local col_width = math.floor(page_width / col_cnt)
+
+  local parts = {}
+  parts[#parts+1] = string.format(
+    '<hp:tbl id="%s" zOrder="0" numberingType="TABLE" textWrap="TOP_AND_BOTTOM"'
+    .. ' textFlow="BOTH_SIDES" lock="0" dropcapstyle="None" pageBreak="CELL"'
+    .. ' repeatHeader="1" rowCnt="%d" colCnt="%d" cellSpacing="0"'
+    .. ' borderFillIDRef="3" noAdjust="0">',
+    tbl_id, row_cnt, col_cnt)
+
+  -- Table body
+  parts[#parts+1] = '<hp:shapeOffset x="0" y="0"/>'
+  parts[#parts+1] = '<hp:sz width="' .. page_width .. '" height="0" widthRelTo="abs" heightRelTo="abs"/>'
+  parts[#parts+1] = '<hp:pos treatAsChar="1" affectLSpacing="0" holdAnchorAndSO="0" allowOverlap="0" flowWithText="1" textWrap="TOP_AND_BOTTOM" textFlow="BOTH_SIDES" />'
+  parts[#parts+1] = string.format('<hp:outMargin left="0" right="0" top="0" bottom="0"/>')
+
+  -- Build rows
+  for ri, row in ipairs(rows) do
+    parts[#parts+1] = '<hp:tr>'
+
+    -- Process cells
+    local col_idx = 0
+    for _, cell in ipairs(row) do
+      local cell_width = col_width * cell.colspan
+      local cell_addr = string.format('colAddr="%d" rowAddr="%d"', col_idx, ri - 1)
+      parts[#parts+1] = string.format(
+        '<hp:tc %s colSpan="%d" rowSpan="1" width="%d" height="0" header="0" hasMargin="0" protect="0" editable="0" dirty="0" borderFillIDRef="3">',
+        cell_addr, cell.colspan, cell_width)
+
+      -- Cell content
+      parts[#parts+1] = '<hp:subList id="' .. unique_id() .. '" textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="CENTER" linkListIDRef="0" linkListNextIDRef="0" textWidth="0" textHeight="0" hasTextRef="0" hasNumRef="0">'
+
+      local para_id = next_para_id()
+      local escaped_text = xml_escape(cell.text)
+      local char_pr = 'charPrIDRef="0"'
+
+      -- First row gets bold
+      if ri == 1 then
+        local bold_id = get_builtin_char_pr_id(0, {bold = true})
+        char_pr = 'charPrIDRef="' .. bold_id .. '"'
+      end
+
+      local lineseg = compute_lineseg_xml(cell.text, CHAR_HEIGHT_NORMAL, cell_width)
+      parts[#parts+1] = string.format(
+        '<hp:p id="%s" paraPrIDRef="0" styleIDRef="0" pageBreak="0" columnBreak="0">',
+        para_id)
+      parts[#parts+1] = '<hp:run ' .. char_pr .. '><hp:secPr/><hp:t>' .. escaped_text .. '</hp:t></hp:run>'
+      parts[#parts+1] = '<hp:linesegarray>' .. lineseg .. '</hp:linesegarray></hp:p>'
+      parts[#parts+1] = '</hp:subList>'
+      parts[#parts+1] = '</hp:tc>'
+
+      col_idx = col_idx + cell.colspan
+    end
+
+    parts[#parts+1] = '</hp:tr>'
+  end
+
+  parts[#parts+1] = '</hp:tbl>'
+  return table.concat(parts, '\n')
+end
+
 local function handle_table(block)
   local caption = block.caption
   local colspecs = block.colspecs
@@ -1031,7 +1131,22 @@ process_blocks = function(blocks, indent_level)
         xml_parts[#xml_parts+1] = make_paragraph_xml(indent_prefix .. line_text)
       end
 
-    -- RawBlock: skip
+    elseif t == 'RawBlock' and block.format == 'openxml' and block.text:find('<w:tbl') then
+      -- Parse OpenXML tables (e.g. gt output rendered for docx)
+      local tbl_xml = parse_openxml_table(block.text)
+      if tbl_xml then
+        xml_parts[#xml_parts+1] = tbl_xml
+      end
+
+    elseif t == 'RawBlock' and block.format == 'html' and block.text:find('<table') then
+      -- Parse HTML tables via pandoc.read
+      local ok, parsed = pcall(pandoc.read, block.text, 'html')
+      if ok and parsed then
+        local sub = process_blocks(parsed.blocks, indent_level)
+        for _, p in ipairs(sub) do xml_parts[#xml_parts+1] = p end
+      end
+
+    -- Other RawBlock: skip
     end
   end
 
