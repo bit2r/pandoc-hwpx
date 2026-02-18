@@ -10,7 +10,7 @@
 
   <!-- Title -->
   <text x="450" y="36" text-anchor="middle" font-size="18" fill="#111" font-weight="600" letter-spacing="0.5">pandoc-hwpx</text>
-  <text x="450" y="56" text-anchor="middle" font-size="11" fill="#888" font-style="italic">Quarto to HWPX Conversion Pipeline</text>
+  <text x="450" y="56" text-anchor="middle" font-size="11" fill="#888" font-style="italic">Quarto to HWPX Conversion Pipeline — Pure Lua, No Python</text>
 
   <!-- ═══════════ TOP: Quarto Pipeline ═══════════ -->
 
@@ -34,76 +34,76 @@
   <!-- Pandoc -->
   <rect x="322" y="112" width="110" height="44" rx="2" fill="#f4f1eb" stroke="#333" stroke-width="1"/>
   <text x="377" y="131" text-anchor="middle" font-size="11" fill="#333" font-weight="600">Pandoc</text>
-  <text x="377" y="147" text-anchor="middle" font-size="9" fill="#666">JSON AST</text>
+  <text x="377" y="147" text-anchor="middle" font-size="9" fill="#666">Lua AST</text>
 
   <line x1="432" y1="134" x2="470" y2="134" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>
 
-  <!-- Lua Filter -->
-  <rect x="476" y="112" width="120" height="44" rx="2" fill="#eef0f6" stroke="#667" stroke-width="1"/>
-  <text x="536" y="131" text-anchor="middle" font-size="10" fill="#333" font-weight="600">Lua Filter</text>
-  <text x="536" y="147" text-anchor="middle" font-size="8" fill="#666">hwpx-filter.lua</text>
+  <!-- ═══════════ RIGHT: Lua Filter Engine ═══════════ -->
 
-  <!-- Lua filter annotations -->
-  <text x="536" y="172" text-anchor="middle" font-size="8" fill="#999" font-style="italic">citeproc + TOC detection</text>
-  <text x="536" y="183" text-anchor="middle" font-size="8" fill="#999" font-style="italic">pandoc.pipe('python3', ...)</text>
-
-  <line x1="596" y1="134" x2="634" y2="134" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>
-  <text x="618" y="127" font-size="8" fill="#999" font-style="italic">JSON</text>
-
-  <!-- ═══════════ RIGHT: Converter Engine ═══════════ -->
-
-  <rect x="640" y="88" width="240" height="220" rx="3" fill="#fafaf5" stroke="#333" stroke-width="1.5"/>
-  <text x="760" y="108" text-anchor="middle" font-size="12" fill="#111" font-weight="600">PandocHwpxConverter</text>
-  <text x="760" y="121" text-anchor="middle" font-size="9" fill="#999" font-style="italic">converter.py  ~2,000 lines</text>
-  <line x1="655" y1="128" x2="865" y2="128" stroke="#ddd" stroke-width="0.5"/>
+  <rect x="476" y="88" width="400" height="220" rx="3" fill="#eef0f6" stroke="#667" stroke-width="1.5"/>
+  <text x="676" y="108" text-anchor="middle" font-size="12" fill="#111" font-weight="600">hwpx-filter.lua</text>
+  <text x="676" y="121" text-anchor="middle" font-size="9" fill="#999" font-style="italic">pure Lua engine  ~1,200 lines</text>
+  <line x1="491" y1="128" x2="861" y2="128" stroke="#ccd" stroke-width="0.5"/>
 
   <!-- Stage 1 -->
-  <circle cx="666" cy="148" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
-  <text x="666" y="151" text-anchor="middle" font-size="8" fill="#555" font-weight="600">1</text>
-  <text x="684" y="152" font-size="10" fill="#333">Meta extraction</text>
-  <text x="684" y="163" font-size="8" fill="#999">title, author, date</text>
+  <circle cx="502" cy="148" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
+  <text x="502" y="151" text-anchor="middle" font-size="8" fill="#555" font-weight="600">1</text>
+  <text x="520" y="152" font-size="10" fill="#333">Meta extraction</text>
+  <text x="520" y="163" font-size="8" fill="#999">title, author, date, citeproc</text>
 
   <!-- Stage 2 -->
-  <circle cx="666" cy="184" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
-  <text x="666" y="187" text-anchor="middle" font-size="8" fill="#555" font-weight="600">2</text>
-  <text x="684" y="188" font-size="10" fill="#333">Template loading</text>
-  <text x="684" y="199" font-size="8" fill="#999">blank.hwpx</text>
+  <circle cx="502" cy="184" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
+  <text x="502" y="187" text-anchor="middle" font-size="8" fill="#555" font-weight="600">2</text>
+  <text x="520" y="188" font-size="10" fill="#333">Template loading</text>
+  <text x="520" y="199" font-size="8" fill="#999">unzip blank.hwpx</text>
 
   <!-- Stage 3 -->
-  <circle cx="666" cy="220" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
-  <text x="666" y="223" text-anchor="middle" font-size="8" fill="#555" font-weight="600">3</text>
-  <text x="684" y="224" font-size="10" fill="#333">Block processing</text>
-  <text x="684" y="235" font-size="8" fill="#999">Header, Para, Table, List, ...</text>
+  <circle cx="502" cy="220" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
+  <text x="502" y="223" text-anchor="middle" font-size="8" fill="#555" font-weight="600">3</text>
+  <text x="520" y="224" font-size="10" fill="#333">Block processing</text>
+  <text x="520" y="235" font-size="8" fill="#999">Header, Para, Table, List, ...</text>
 
   <!-- Stage 4 -->
-  <circle cx="666" cy="256" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
-  <text x="666" y="259" text-anchor="middle" font-size="8" fill="#555" font-weight="600">4</text>
-  <text x="684" y="260" font-size="10" fill="#333">Inline formatting</text>
-  <text x="684" y="271" font-size="8" fill="#999">Bold, Code, Link, Image, Math</text>
+  <circle cx="502" cy="256" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
+  <text x="502" y="259" text-anchor="middle" font-size="8" fill="#555" font-weight="600">4</text>
+  <text x="520" y="260" font-size="10" fill="#333">Inline formatting</text>
+  <text x="520" y="271" font-size="8" fill="#999">Bold, Code, Link, Image, Math</text>
 
   <!-- Stage 5 -->
-  <circle cx="666" cy="292" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
-  <text x="666" y="295" text-anchor="middle" font-size="8" fill="#555" font-weight="600">5</text>
-  <text x="684" y="296" font-size="10" fill="#333">XML assembly + ZIP</text>
+  <circle cx="502" cy="292" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
+  <text x="502" y="295" text-anchor="middle" font-size="8" fill="#555" font-weight="600">5</text>
+  <text x="520" y="296" font-size="10" fill="#333">XML assembly + ZIP</text>
 
   <!-- Vertical connectors -->
-  <line x1="666" y1="158" x2="666" y2="174" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,2"/>
-  <line x1="666" y1="194" x2="666" y2="210" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,2"/>
-  <line x1="666" y1="230" x2="666" y2="246" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,2"/>
-  <line x1="666" y1="266" x2="666" y2="282" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,2"/>
+  <line x1="502" y1="158" x2="502" y2="174" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,2"/>
+  <line x1="502" y1="194" x2="502" y2="210" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,2"/>
+  <line x1="502" y1="230" x2="502" y2="246" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,2"/>
+  <line x1="502" y1="266" x2="502" y2="282" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,2"/>
 
-  <!-- Arrow from converter to HWPX -->
-  <line x1="760" y1="308" x2="760" y2="342" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>
-  <text x="770" y="332" font-size="8" fill="#999" font-style="italic">ZIP</text>
+  <!-- Built-in modules sidebar -->
+  <line x1="690" y1="138" x2="690" y2="300" stroke="#ccd" stroke-width="0.5"/>
+  <text x="700" y="152" font-size="9" fill="#555" font-weight="600">Built-in Modules</text>
+  <text x="700" y="172" font-size="9" fill="#667">math_converter</text>
+  <text x="704" y="184" font-size="8" fill="#999" font-style="italic">LaTeX to HWP equation</text>
+  <text x="700" y="204" font-size="9" fill="#667">lineseg_calculator</text>
+  <text x="704" y="216" font-size="8" fill="#999" font-style="italic">line break for Mac</text>
+  <text x="700" y="236" font-size="9" fill="#667">image_dimensions</text>
+  <text x="704" y="248" font-size="8" fill="#999" font-style="italic">PNG/JPEG header parse</text>
+  <text x="700" y="268" font-size="9" fill="#667">charPr_manager</text>
+  <text x="704" y="280" font-size="8" fill="#999" font-style="italic">dynamic style cache</text>
 
-  <!-- ═══════════ LEFT MARGIN: Key Modules ═══════════ -->
+  <!-- Arrow from engine to HWPX -->
+  <line x1="676" y1="308" x2="676" y2="342" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>
+  <text x="686" y="332" font-size="8" fill="#999" font-style="italic">ZIP</text>
 
-  <text x="24" y="222" font-size="9" fill="#999" letter-spacing="1.5" font-variant="small-caps">KEY MODULES</text>
+  <!-- ═══════════ LEFT MARGIN: System Dependencies ═══════════ -->
+
+  <text x="24" y="222" font-size="9" fill="#999" letter-spacing="1.5" font-variant="small-caps">DEPENDENCIES</text>
   <line x1="24" y1="227" x2="160" y2="227" stroke="#ddd" stroke-width="0.5"/>
-  <text x="24" y="244" font-size="9" fill="#555">math_converter.py</text>
-  <text x="28" y="256" font-size="8" fill="#999" font-style="italic">LaTeX to HWP equation script</text>
-  <text x="24" y="274" font-size="9" fill="#555">lineseg.py</text>
-  <text x="28" y="286" font-size="8" fill="#999" font-style="italic">line break calculation for Mac</text>
+  <text x="24" y="244" font-size="9" fill="#555">zip / unzip</text>
+  <text x="28" y="256" font-size="8" fill="#999" font-style="italic">system commands (macOS/Linux)</text>
+  <text x="24" y="274" font-size="9" fill="#555">No Python</text>
+  <text x="28" y="286" font-size="8" fill="#999" font-style="italic">pure Lua, zero pip install</text>
 
   <!-- ═══════════ BOTTOM: HWPX Structure ═══════════ -->
 
