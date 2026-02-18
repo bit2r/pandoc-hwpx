@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "pandoc-hwpx"
+version = "0.1.0"
+description = "Pandoc JSON AST to HWPX converter with full inline formatting, images, tables, math, and Korean typography"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+dependencies = [
+    "Pillow>=9.0",
+]
+
+[project.scripts]
+pandoc-hwpx = "pandoc_hwpx.__main__:main"
+
+[tool.setuptools.packages.find]
+include = ["pandoc_hwpx*"]
+
+[tool.setuptools.package-data]
+pandoc_hwpx = ["templates/*.hwpx", "templates/fonts/*.otf", "templates/fonts/*.ttf"]

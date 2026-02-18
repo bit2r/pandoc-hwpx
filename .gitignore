@@ -1,0 +1,28 @@
+# Quarto render outputs
+*.docx
+*.hwpx
+*.json
+*.docx.hwpx-cleanup
+example_files/
+.quarto/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Test outputs
+test_output.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.luarc.json
+.vscode/
+.idea/

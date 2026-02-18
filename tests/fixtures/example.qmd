@@ -1,0 +1,293 @@
+---
+title: "디지털 전환 추진 현황 보고"
+author: "디지털혁신팀"
+date: today
+format:
+  hwpx-docx:
+    toc: true
+---
+
+## 추진 배경
+
+디지털 기술의 급속한 발전에 따라 공공부문의 디지털 전환이 필수 과제로 대두되고 있다. 특히 생성형 AI와 클라우드 컴퓨팅의 확산으로 업무 프로세스 혁신의 가능성이 크게 확대되었다.
+
+□ 정부 디지털 플랫폼 정책 추진에 따른 대응 필요
+
+□ 국민 서비스 품질 향상을 위한 디지털 인프라 고도화 시급
+
+□ 내부 업무 효율화 및 데이터 기반 의사결정 체계 구축
+
+## 현황 및 문제점
+
+### 현행 시스템 운영 현황
+
+현재 기관 내 주요 업무시스템은 다음과 같이 운영 중이다.
+
+: 주요 업무시스템 현황
+
+| 시스템명 | 도입년도 | 사용자수 | 상태 |
+|---------|---------|---------|------|
+| 전자결재시스템 | 2018 | 1,200명 | 노후화 |
+| 인사관리시스템 | 2020 | 350명 | 정상 |
+| 문서관리시스템 | 2016 | 1,500명 | 교체필요 |
+| 데이터분석플랫폼 | 2023 | 80명 | 정상 |
+
+### 유지보수 비용 추이
+
+연도별 유지보수 비용 증가 추세를 시각화하면 다음과 같다.
+
+```{r}
+#| label: fig-maintenance-cost
+#| fig-cap: "연도별 유지보수 비용 추이 (백만원)"
+#| echo: false
+#| warning: false
+#| message: false
+
+library(ggplot2)
+library(dplyr)
+
+cost_data <- tibble(
+  연도 = 2019:2025,
+  유지보수비용 = c(320, 350, 380, 430, 580, 620, 450),
+  구분 = c(rep("현행", 5), rep("클라우드 전환 후", 2))
+)
+
+ggplot(cost_data, aes(x = 연도, y = 유지보수비용, fill = 구분)) +
+  geom_col(width = 0.6) +
+  geom_text(aes(label = 유지보수비용), vjust = -0.5, size = 3.5) +
+  scale_fill_manual(values = c("현행" = "#4472C4", "클라우드 전환 후" = "#70AD47")) +
+  scale_y_continuous(limits = c(0, 750), expand = c(0, 0)) +
+  labs(x = "연도", y = "비용 (백만원)", fill = "") +
+  theme_minimal(base_family = "NanumSquare") +
+  theme(
+    legend.position = "top",
+    panel.grid.minor = element_blank()
+  )
+```
+
+### 시스템별 사용자 만족도
+
+```{r}
+#| label: fig-satisfaction
+#| fig-cap: "시스템별 사용자 만족도 조사 결과"
+#| echo: false
+#| warning: false
+#| message: false
+
+satisfaction <- tibble(
+  시스템 = c("전자결재", "인사관리", "문서관리", "데이터분석"),
+  만족도 = c(3.2, 4.1, 2.5, 4.3),
+  응답수 = c(450, 280, 520, 65)
+)
+
+ggplot(satisfaction, aes(x = reorder(시스템, 만족도), y = 만족도)) +
+  geom_col(fill = "#4472C4", width = 0.5) +
+  geom_hline(yintercept = 3.5, linetype = "dashed", color = "red") +
+  geom_text(aes(label = sprintf("%.1f점\n(n=%d)", 만족도, 응답수)),
+            hjust = -0.1, size = 3.2) +
+  coord_flip() +
+  scale_y_continuous(limits = c(0, 5.5), breaks = 1:5) +
+  annotate("text", x = 0.7, y = 3.6, label = "목표(3.5점)",
+           color = "red", size = 3, hjust = 0) +
+  labs(x = "", y = "만족도 (5점 척도)") +
+  theme_minimal(base_family = "NanumSquare") +
+  theme(panel.grid.minor = element_blank())
+```
+
+### 주요 문제점
+
+□ 시스템 간 데이터 연계 부족으로 중복 입력 발생
+
+　○ 전자결재-문서관리 간 수동 연동으로 처리 지연
+
+　○ 부서별 독립 운영으로 데이터 일관성 저하
+
+□ 노후 시스템 유지보수 비용 증가
+
+　○ 2023년 유지보수 비용: 전년 대비 35% 증가
+
+　○ 보안 취약점 패치 지연으로 사이버 위협 노출
+
+□ 디지털 역량 격차
+
+　○ MZ세대와 기존 직원 간 디지털 활용도 차이
+
+　○ 체계적인 디지털 교육 프로그램 부재
+
+## 개선 방안
+
+### 클라우드 기반 통합 플랫폼 구축
+
+레거시 시스템을 클라우드 네이티브 아키텍처로 전환하고, 마이크로서비스 기반의 통합 플랫폼을 구축한다.
+
+> 2025년 상반기 클라우드 전환 1단계를 완료하고, 하반기에 AI 기반 문서 자동 분류 시스템을 도입할 계획이다.
+
+### 데이터 표준화 및 연계 체계 확립
+
+부서 간 데이터 표준을 수립하고 API 기반 실시간 연계 체계를 구축한다.
+
+```
+[데이터 연계 아키텍처]
+
+부서A 시스템 ─┐
+부서B 시스템 ─┼── API Gateway ── 통합 데이터 허브
+부서C 시스템 ─┘
+```
+
+### 디지털 역량 강화 프로그램
+
+1. 전 직원 대상 디지털 기초 교육 (연 2회)
+2. 부서별 디지털 챔피언 선발 및 심화 교육
+3. AI 활용 업무 혁신 워크숍 운영 (분기별)
+4. 디지털 역량 평가 체계 도입
+
+## 추진 일정
+
+: 단계별 추진 일정
+
+| 단계 | 기간 | 주요 내용 |
+|------|------|----------|
+| 1단계 | 2025.상반기 | 클라우드 인프라 구축, 전자결재 전환 |
+| 2단계 | 2025.하반기 | 문서관리 전환, AI 문서 분류 도입 |
+| 3단계 | 2026.상반기 | 통합 데이터 허브 구축, API 연계 |
+| 4단계 | 2026.하반기 | 전체 시스템 통합 및 안정화 |
+
+### 단계별 투자 및 기대 절감액
+
+```{r}
+#| label: fig-investment
+#| fig-cap: "단계별 투자 비용 vs 기대 절감액 (백만원)"
+#| echo: false
+#| warning: false
+#| message: false
+
+library(tidyr)
+
+invest_data <- tibble(
+  단계 = factor(paste0(rep(c("1단계\n(25상)", "2단계\n(25하)",
+                              "3단계\n(26상)", "4단계\n(26하)"), each = 2)),
+                levels = c("1단계\n(25상)", "2단계\n(25하)",
+                           "3단계\n(26상)", "4단계\n(26하)")),
+  구분 = rep(c("투자 비용", "기대 절감액"), 4),
+  금액 = c(800, 50, 600, 200, 400, 350, 200, 500)
+)
+
+ggplot(invest_data, aes(x = 단계, y = 금액, fill = 구분)) +
+  geom_col(position = "dodge", width = 0.6) +
+  geom_text(aes(label = 금액), position = position_dodge(width = 0.6),
+            vjust = -0.5, size = 3.2) +
+  scale_fill_manual(values = c("투자 비용" = "#C00000", "기대 절감액" = "#70AD47")) +
+  scale_y_continuous(limits = c(0, 950), expand = c(0, 0)) +
+  labs(x = "", y = "금액 (백만원)", fill = "") +
+  theme_minimal(base_family = "NanumSquare") +
+  theme(
+    legend.position = "top",
+    panel.grid.minor = element_blank()
+  )
+```
+
+## 기대 효과
+
+- 업무 처리 시간 30% 단축 (문서 처리 자동화)
+- 연간 유지보수 비용 5억원 절감
+- 데이터 기반 정책 의사결정 지원 체계 확립
+- 국민 서비스 응답 시간 50% 개선
+
+## 핵심 성과 지표 (KPI)
+
+디지털 전환의 성과를 측정하기 위해 Balanced Scorecard 방법론에 기반한 핵심 성과 지표(Key Performance Indicators)를 수립하였다.
+
+### KPI 요약
+
+```{r}
+#| label: tbl-kpi
+#| tbl-cap: "핵심 성과 지표 (KPI) 현황"
+#| echo: false
+#| warning: false
+#| message: false
+
+kpi_data <- tibble(
+  지표 = c("시스템 가용성", "업무처리 시간", "유지보수 비용",
+           "사용자 만족도", "데이터 연계율"),
+  현재값 = c("97.2%", "평균 48시간", "580백만원/년",
+             "3.2점/5점", "35%"),
+  목표값 = c("99.9%", "평균 24시간", "300백만원/년",
+             "4.5점/5점", "95%"),
+  달성률 = c("72%", "45%", "20%", "55%", "15%")
+)
+
+knitr::kable(kpi_data, align = "lccc")
+```
+
+### 비용 효율성 분석
+
+클라우드 전환에 따른 Total Cost of Ownership 절감 효과는 다음과 같이 산출한다.
+
+연간 절감액 = 기존 유지보수 비용 - 클라우드 운영 비용 - 전환 비용/5년
+
+> The digital transformation ROI is calculated based on a five-year amortization schedule, following the guidelines established by the Government Digital Service framework.
+
+### NPV 시뮬레이션
+
+```{r}
+#| label: fig-npv
+#| fig-cap: "할인율에 따른 순현재가치(NPV) 민감도 분석"
+#| echo: false
+#| warning: false
+#| message: false
+
+benefits <- c(0, 200, 500, 800, 1000)
+costs <- c(1500, 300, 250, 200, 200)
+
+npv_sim <- tibble(
+  할인율 = seq(0.01, 0.10, by = 0.005)
+) |>
+  rowwise() |>
+  mutate(
+    NPV = sum((benefits - costs) / (1 + 할인율)^(0:4))
+  ) |>
+  ungroup()
+
+ggplot(npv_sim, aes(x = 할인율 * 100, y = NPV)) +
+  geom_line(color = "#4472C4", linewidth = 1.2) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_vline(xintercept = 3.5, linetype = "dotted", color = "red") +
+  annotate("text", x = 4, y = max(npv_sim$NPV) * 0.9,
+           label = "현재 할인율\n(3.5%)", color = "red", size = 3) +
+  geom_point(data = npv_sim |> filter(abs(할인율 - 0.035) < 0.003),
+             color = "red", size = 3) +
+  labs(x = "할인율 (%)", y = "NPV (백만원)") +
+  theme_minimal(base_family = "NanumSquare") +
+  theme(panel.grid.minor = element_blank())
+```
+
+### 한자 용어 참조
+
+본 보고서에서 사용된 주요 한자 용어는 다음과 같다.
+
+: 주요 한자 용어
+
+| 한글 | 한자 | 영문 |
+|------|------|------|
+| 디지털 전환 | 數位轉換 | Digital Transformation |
+| 인공지능 | 人工知能 | Artificial Intelligence |
+| 정보보안 | 情報保安 | Information Security |
+| 전자결재 | 電子決裁 | Electronic Approval |
+| 공공기관 | 公共機關 | Public Institution |
+| 업무혁신 | 業務革新 | Business Innovation |
+
+□ 數位轉換(디지털 전환)은 公共機關(공공기관)의 業務革新(업무혁신)을 위한 핵심 과제이다.
+
+□ 人工知能(인공지능) 기반 情報保安(정보보안) 체계를 구축하여 사이버 위협에 대응한다.
+
+### 수식 및 통계 지표
+
+비용 편익 분석(Cost-Benefit Analysis)에서 순현재가치(NPV)는 다음과 같다.
+
+$NPV = \sum_{t=0}^{n} \frac{B_t - C_t}{(1 + r)^t}$
+
+여기서 B_t는 t기의 편익, C_t는 t기의 비용, r은 할인율(3.5%), n은 분석 기간(5년)이다.
+
+---
+
+끝.
