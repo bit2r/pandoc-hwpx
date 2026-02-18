@@ -1,17 +1,17 @@
 # pandoc-hwpx
 
-Pandoc JSON AST를 한글과컴퓨터 HWPX 문서(.hwpx)로 변환하는 Python 패키지.
-pypandoc-hwpx 아키텍처 + quarto-hwpx 한국어 타이포그래피 기능 통합.
+Quarto 문서(.qmd)를 한글과컴퓨터 HWPX 문서(.hwpx)로 변환하는 Quarto extension.
+Python 변환 엔진 + Lua 필터 래퍼 구조.
 
 ## 프로젝트 구조
 
-단일 저장소, 이중 배포: `pip install pandoc-hwpx` (PyPI) + `quarto add bit2r/pandoc-hwpx` (GitHub)
+Quarto extension (Python 엔진 내장): `pip install pandoc-hwpx` (PyPI) + `quarto add bit2r/pandoc-hwpx` (GitHub)
 
 ```
 pandoc-hwpx/
-├── pandoc_hwpx/                  # Python 패키지 (pip install 대상)
+├── pandoc_hwpx/                  # Python 엔진 (pip install 대상)
 │   ├── __init__.py              # 패키지 초기화
-│   ├── __main__.py              # CLI: stdin JSON AST → HWPX 출력
+│   ├── __main__.py              # Lua 필터 내부 호출 전용 엔트리포인트
 │   ├── converter.py             # 메인 엔진 (PandocHwpxConverter 클래스)
 │   ├── math_converter.py        # LaTeX → HWP 수식 스크립트 변환
 │   ├── lineseg.py               # linesegarray 계산기
@@ -36,43 +36,38 @@ pandoc-hwpx/
 ## 설치
 
 ```bash
-# Python 패키지 설치 (PyPI)
+# Python 엔진 설치 (PyPI)
 pip install pandoc-hwpx
 
-# Quarto extension 설치 (GitHub) — Quarto 사용 시에만
+# Quarto extension 설치 (GitHub)
 quarto add bit2r/pandoc-hwpx
 ```
 
 ## 사용법
 
+```yaml
+# _quarto.yml
+format:
+  hwpx-docx:
+    toc: true
+    bibliography: references.bib
+```
+
 ```bash
-# Standalone CLI — Pandoc JSON AST를 직접 변환
-pandoc input.qmd -t json | python -m pandoc_hwpx -o output.hwpx
-
-# 이미지 경로 기준 디렉토리 지정
-pandoc input.qmd -t json | python -m pandoc_hwpx -o output.hwpx --input-dir /path/to/input
-
-# 레퍼런스 문서 사용 (스타일/페이지 설정 상속)
-pandoc input.md -t json | python -m pandoc_hwpx -o output.hwpx --reference-doc ref.hwpx
-
-# Quarto 연동 — _quarto.yml에서 format 지정
-# format:
-#   hwpx-docx:
-#     toc: true
-#     bibliography: references.bib
+quarto render example.qmd --to hwpx-docx
 ```
 
 ## 아키텍처
 
-### 두 가지 모드
+```
+.qmd → Quarto render → Pandoc → Lua Filter → Python Engine → .hwpx
+```
 
-1. **Built-in 모드** (기본): `blank.hwpx` 템플릿 + raw XML 문자열 조립
-   - 한국어 폰트 매핑, heading charPr, 코드블록 D2Coding
-   - quarto-hwpx 방식의 직접 XML 생성
+Lua 필터(`hwpx-filter.lua`)가 Pandoc 내부에서 JSON AST를 가로채
+`pandoc.pipe('python3', {'-m', 'pandoc_hwpx', '-o', path, '--input-dir', dir}, json_ast)`로
+Python 엔진을 호출한다. citeproc 실행과 TOC 감지도 Lua 필터가 처리한다.
 
-2. **Reference-doc 모드** (`--reference-doc`): 레퍼런스 문서에서 스타일 상속
-   - pypandoc-hwpx 방식의 ElementTree 파싱 + 동적 charPr 복제
-   - outline level 자동 매핑, 네이티브 목록 numbering 정의 생성
+`__main__.py`는 Lua 필터 내부 호출 전용이며, 사용자가 직접 실행하지 않는다.
 
 ### 핵심 클래스: PandocHwpxConverter
 
@@ -155,7 +150,6 @@ converter.py
 ### namespace 호환성
 한글 Mac은 XML namespace prefix를 하드코딩 인식 (hp:, hs:, hc:, hh:).
 Built-in 모드에서는 raw XML 문자열로 원본 prefix 유지.
-Reference-doc 모드에서는 ET.register_namespace()로 prefix 등록.
 
 ### linesegarray
 한글 Mac에서 필수. 텍스트 길이 기반 줄바꿈 계산.
@@ -164,10 +158,9 @@ CJK ≈ char_height 폭, Latin ≈ char_height/2 폭.
 ### 의존성
 - Python 표준 라이브러리: zipfile, json, re, xml, argparse, copy
 - Pillow: 이미지 크기 자동 계산 (선택, 없으면 기본 크기 사용)
-- pypandoc 불필요: stdin에서 직접 JSON AST 읽기
 
 ## 계보
 
 - **quarto-hwpx**: 수식, lineseg, 한국어 폰트, 블록타입 → 이식
-- **pypandoc-hwpx**: 인라인 서식, 이미지, 테이블, 하이퍼링크, 각주, 네이티브 목록, 레퍼런스 문서 → 이식
+- **pypandoc-hwpx**: 인라인 서식, 이미지, 테이블, 하이퍼링크, 각주, 네이티브 목록 → 이식
 - **pandoc-hwpx**: 두 프로젝트의 장점 통합 + Quarto 코드 실행 결과 지원

@@ -1,205 +1,160 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620" font-family="'Palatino Linotype','Georgia','Noto Serif KR',serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 580" font-family="'Palatino Linotype','Georgia','Noto Serif KR',serif">
   <defs>
     <marker id="arrow" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
       <polygon points="0 0, 7 2.5, 0 5" fill="#333"/>
     </marker>
-    <marker id="arrow-muted" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
-      <polygon points="0 0, 7 2.5, 0 5" fill="#999"/>
-    </marker>
   </defs>
 
   <!-- Background -->
-  <rect width="900" height="620" fill="#fffff8"/>
+  <rect width="900" height="580" fill="#fffff8"/>
 
   <!-- Title -->
   <text x="450" y="36" text-anchor="middle" font-size="18" fill="#111" font-weight="600" letter-spacing="0.5">pandoc-hwpx</text>
-  <text x="450" y="56" text-anchor="middle" font-size="11" fill="#888" font-style="italic">Pandoc JSON AST to HWPX Conversion Pipeline</text>
+  <text x="450" y="56" text-anchor="middle" font-size="11" fill="#888" font-style="italic">Quarto to HWPX Conversion Pipeline</text>
 
-  <!-- ═══════════ LEFT COLUMN: Two Entry Paths ═══════════ -->
+  <!-- ═══════════ TOP: Quarto Pipeline ═══════════ -->
 
-  <!-- Path A: Standalone CLI -->
-  <text x="24" y="96" font-size="9" fill="#999" letter-spacing="1.5" font-variant="small-caps">STANDALONE CLI</text>
+  <text x="24" y="96" font-size="9" fill="#999" letter-spacing="1.5" font-variant="small-caps">QUARTO PIPELINE</text>
   <line x1="24" y1="101" x2="200" y2="101" stroke="#ddd" stroke-width="0.5"/>
 
-  <rect x="24" y="112" width="120" height="36" rx="2" fill="none" stroke="#333" stroke-width="1"/>
-  <text x="84" y="133" text-anchor="middle" font-size="11" fill="#333">.md  .qmd  .Rmd</text>
+  <!-- .qmd -->
+  <rect x="24" y="112" width="100" height="44" rx="2" fill="none" stroke="#333" stroke-width="1"/>
+  <text x="74" y="131" text-anchor="middle" font-size="11" fill="#333">.qmd</text>
+  <text x="74" y="147" text-anchor="middle" font-size="8" fill="#888">format: hwpx-docx</text>
 
-  <line x1="144" y1="130" x2="182" y2="130" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>
+  <line x1="124" y1="134" x2="162" y2="134" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>
 
-  <rect x="188" y="112" width="100" height="36" rx="2" fill="#f4f1eb" stroke="#333" stroke-width="1"/>
-  <text x="238" y="127" text-anchor="middle" font-size="11" fill="#333" font-weight="600">Pandoc</text>
-  <text x="238" y="141" text-anchor="middle" font-size="9" fill="#666">-t json</text>
+  <!-- Quarto render -->
+  <rect x="168" y="112" width="110" height="44" rx="2" fill="#f4f1eb" stroke="#333" stroke-width="1"/>
+  <text x="223" y="131" text-anchor="middle" font-size="11" fill="#333" font-weight="600">Quarto</text>
+  <text x="223" y="147" text-anchor="middle" font-size="9" fill="#666">render</text>
 
-  <line x1="288" y1="130" x2="326" y2="130" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>
+  <line x1="278" y1="134" x2="316" y2="134" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>
 
-  <rect x="332" y="112" width="100" height="36" rx="2" fill="none" stroke="#333" stroke-width="1" stroke-dasharray="4,2"/>
-  <text x="382" y="133" text-anchor="middle" font-size="10" fill="#333">JSON AST</text>
+  <!-- Pandoc -->
+  <rect x="322" y="112" width="110" height="44" rx="2" fill="#f4f1eb" stroke="#333" stroke-width="1"/>
+  <text x="377" y="131" text-anchor="middle" font-size="11" fill="#333" font-weight="600">Pandoc</text>
+  <text x="377" y="147" text-anchor="middle" font-size="9" fill="#666">JSON AST</text>
 
-  <!-- pipe annotation -->
-  <text x="310" y="118" text-anchor="middle" font-size="8" fill="#999" font-style="italic">stdin</text>
+  <line x1="432" y1="134" x2="470" y2="134" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>
 
-  <!-- Path B: Quarto -->
-  <text x="24" y="180" font-size="9" fill="#999" letter-spacing="1.5" font-variant="small-caps">QUARTO INTEGRATION</text>
-  <line x1="24" y1="185" x2="200" y2="185" stroke="#ddd" stroke-width="0.5"/>
+  <!-- Lua Filter -->
+  <rect x="476" y="112" width="120" height="44" rx="2" fill="#eef0f6" stroke="#667" stroke-width="1"/>
+  <text x="536" y="131" text-anchor="middle" font-size="10" fill="#333" font-weight="600">Lua Filter</text>
+  <text x="536" y="147" text-anchor="middle" font-size="8" fill="#666">hwpx-filter.lua</text>
 
-  <rect x="24" y="196" width="120" height="36" rx="2" fill="none" stroke="#333" stroke-width="1"/>
-  <text x="84" y="211" text-anchor="middle" font-size="11" fill="#333">.qmd</text>
-  <text x="84" y="225" text-anchor="middle" font-size="8" fill="#888">format: hwpx-docx</text>
+  <!-- Lua filter annotations -->
+  <text x="536" y="172" text-anchor="middle" font-size="8" fill="#999" font-style="italic">citeproc + TOC detection</text>
+  <text x="536" y="183" text-anchor="middle" font-size="8" fill="#999" font-style="italic">pandoc.pipe('python3', ...)</text>
 
-  <line x1="144" y1="214" x2="182" y2="214" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>
+  <line x1="596" y1="134" x2="634" y2="134" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>
+  <text x="618" y="127" font-size="8" fill="#999" font-style="italic">JSON</text>
 
-  <rect x="188" y="196" width="100" height="36" rx="2" fill="#f4f1eb" stroke="#333" stroke-width="1"/>
-  <text x="238" y="211" text-anchor="middle" font-size="11" fill="#333" font-weight="600">Quarto</text>
-  <text x="238" y="225" text-anchor="middle" font-size="9" fill="#666">render</text>
+  <!-- ═══════════ RIGHT: Converter Engine ═══════════ -->
 
-  <line x1="288" y1="214" x2="326" y2="214" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>
+  <rect x="640" y="88" width="240" height="220" rx="3" fill="#fafaf5" stroke="#333" stroke-width="1.5"/>
+  <text x="760" y="108" text-anchor="middle" font-size="12" fill="#111" font-weight="600">PandocHwpxConverter</text>
+  <text x="760" y="121" text-anchor="middle" font-size="9" fill="#999" font-style="italic">converter.py  ~2,000 lines</text>
+  <line x1="655" y1="128" x2="865" y2="128" stroke="#ddd" stroke-width="0.5"/>
 
-  <rect x="332" y="196" width="100" height="36" rx="2" fill="#eef0f6" stroke="#667" stroke-width="1"/>
-  <text x="382" y="211" text-anchor="middle" font-size="10" fill="#333" font-weight="600">Lua Filter</text>
-  <text x="382" y="225" text-anchor="middle" font-size="8" fill="#666">hwpx-filter.lua</text>
+  <!-- Stage 1 -->
+  <circle cx="666" cy="148" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
+  <text x="666" y="151" text-anchor="middle" font-size="8" fill="#555" font-weight="600">1</text>
+  <text x="684" y="152" font-size="10" fill="#333">Meta extraction</text>
+  <text x="684" y="163" font-size="8" fill="#999">title, author, date</text>
 
-  <!-- Lua filter annotation: citeproc -->
-  <text x="445" y="201" font-size="8" fill="#999" font-style="italic">citeproc</text>
-  <text x="445" y="211" font-size="8" fill="#999" font-style="italic">TOC detection</text>
-  <text x="445" y="221" font-size="8" fill="#999" font-style="italic">pandoc.pipe()</text>
+  <!-- Stage 2 -->
+  <circle cx="666" cy="184" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
+  <text x="666" y="187" text-anchor="middle" font-size="8" fill="#555" font-weight="600">2</text>
+  <text x="684" y="188" font-size="10" fill="#333">Template loading</text>
+  <text x="684" y="199" font-size="8" fill="#999">blank.hwpx</text>
 
-  <!-- Both paths converge -->
-  <line x1="382" y1="148" x2="382" y2="165" stroke="#333" stroke-width="1"/>
-  <line x1="382" y1="165" x2="520" y2="165" stroke="#333" stroke-width="1"/>
-  <line x1="382" y1="232" x2="382" y2="249" stroke="#333" stroke-width="1"/>
-  <line x1="382" y1="249" x2="520" y2="249" stroke="#333" stroke-width="1"/>
-  <line x1="520" y1="165" x2="520" y2="249" stroke="#333" stroke-width="1"/>
-  <line x1="520" y1="207" x2="544" y2="207" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>
+  <!-- Stage 3 -->
+  <circle cx="666" cy="220" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
+  <text x="666" y="223" text-anchor="middle" font-size="8" fill="#555" font-weight="600">3</text>
+  <text x="684" y="224" font-size="10" fill="#333">Block processing</text>
+  <text x="684" y="235" font-size="8" fill="#999">Header, Para, Table, List, ...</text>
 
-  <!-- Convergence label -->
-  <text x="530" y="195" font-size="8" fill="#999" font-style="italic">JSON</text>
-  <text x="530" y="205" font-size="8" fill="#999" font-style="italic">AST</text>
+  <!-- Stage 4 -->
+  <circle cx="666" cy="256" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
+  <text x="666" y="259" text-anchor="middle" font-size="8" fill="#555" font-weight="600">4</text>
+  <text x="684" y="260" font-size="10" fill="#333">Inline formatting</text>
+  <text x="684" y="271" font-size="8" fill="#999">Bold, Code, Link, Image, Math</text>
 
-  <!-- ═══════════ CENTER: Converter Engine ═══════════ -->
+  <!-- Stage 5 -->
+  <circle cx="666" cy="292" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
+  <text x="666" y="295" text-anchor="middle" font-size="8" fill="#555" font-weight="600">5</text>
+  <text x="684" y="296" font-size="10" fill="#333">XML assembly + ZIP</text>
 
-  <rect x="550" y="88" width="320" height="248" rx="3" fill="#fafaf5" stroke="#333" stroke-width="1.5"/>
-  <text x="710" y="108" text-anchor="middle" font-size="12" fill="#111" font-weight="600">PandocHwpxConverter</text>
-  <text x="710" y="121" text-anchor="middle" font-size="9" fill="#999" font-style="italic">converter.py  ~2,000 lines</text>
-  <line x1="565" y1="128" x2="855" y2="128" stroke="#ddd" stroke-width="0.5"/>
+  <!-- Vertical connectors -->
+  <line x1="666" y1="158" x2="666" y2="174" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,2"/>
+  <line x1="666" y1="194" x2="666" y2="210" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,2"/>
+  <line x1="666" y1="230" x2="666" y2="246" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,2"/>
+  <line x1="666" y1="266" x2="666" y2="282" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,2"/>
 
-  <!-- Internal pipeline stages -->
-  <!-- Stage 1: Parse -->
-  <circle cx="580" cy="148" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
-  <text x="580" y="151" text-anchor="middle" font-size="8" fill="#555" font-weight="600">1</text>
-  <text x="598" y="152" font-size="10" fill="#333">Meta extraction</text>
-  <text x="598" y="163" font-size="8" fill="#999">title, author, date, bibliography</text>
+  <!-- Arrow from converter to HWPX -->
+  <line x1="760" y1="308" x2="760" y2="342" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>
+  <text x="770" y="332" font-size="8" fill="#999" font-style="italic">ZIP</text>
 
-  <!-- Stage 2: Template -->
-  <circle cx="580" cy="184" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
-  <text x="580" y="187" text-anchor="middle" font-size="8" fill="#555" font-weight="600">2</text>
-  <text x="598" y="188" font-size="10" fill="#333">Template loading</text>
-  <text x="598" y="199" font-size="8" fill="#999">blank.hwpx  or  --reference-doc</text>
+  <!-- ═══════════ LEFT MARGIN: Key Modules ═══════════ -->
 
-  <!-- Stage 3: Block processing -->
-  <circle cx="580" cy="220" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
-  <text x="580" y="223" text-anchor="middle" font-size="8" fill="#555" font-weight="600">3</text>
-  <text x="598" y="224" font-size="10" fill="#333">Block processing</text>
-  <text x="598" y="235" font-size="8" fill="#999">Header, Para, Table, CodeBlock, List, ...</text>
-
-  <!-- Stage 4: Inline processing -->
-  <circle cx="580" cy="256" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
-  <text x="580" y="259" text-anchor="middle" font-size="8" fill="#555" font-weight="600">4</text>
-  <text x="598" y="260" font-size="10" fill="#333">Inline formatting</text>
-  <text x="598" y="271" font-size="8" fill="#999">Bold, Italic, Code, Link, Image, Math, Note</text>
-
-  <!-- Stage 5: XML assembly -->
-  <circle cx="580" cy="292" r="10" fill="#e8e5de" stroke="#999" stroke-width="0.5"/>
-  <text x="580" y="295" text-anchor="middle" font-size="8" fill="#555" font-weight="600">5</text>
-  <text x="598" y="296" font-size="10" fill="#333">XML assembly</text>
-  <text x="598" y="307" font-size="8" fill="#999">section0.xml + header.xml + content.hpf</text>
-
-  <!-- Vertical connector between stages -->
-  <line x1="580" y1="158" x2="580" y2="174" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,2"/>
-  <line x1="580" y1="194" x2="580" y2="210" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,2"/>
-  <line x1="580" y1="230" x2="580" y2="246" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,2"/>
-  <line x1="580" y1="266" x2="580" y2="282" stroke="#ccc" stroke-width="0.5" stroke-dasharray="2,2"/>
+  <text x="24" y="222" font-size="9" fill="#999" letter-spacing="1.5" font-variant="small-caps">KEY MODULES</text>
+  <line x1="24" y1="227" x2="160" y2="227" stroke="#ddd" stroke-width="0.5"/>
+  <text x="24" y="244" font-size="9" fill="#555">math_converter.py</text>
+  <text x="28" y="256" font-size="8" fill="#999" font-style="italic">LaTeX to HWP equation script</text>
+  <text x="24" y="274" font-size="9" fill="#555">lineseg.py</text>
+  <text x="28" y="286" font-size="8" fill="#999" font-style="italic">line break calculation for Mac</text>
 
   <!-- ═══════════ BOTTOM: HWPX Structure ═══════════ -->
 
-  <!-- Arrow from converter to HWPX -->
-  <line x1="710" y1="336" x2="710" y2="362" stroke="#333" stroke-width="1" marker-end="url(#arrow)"/>
-  <text x="720" y="355" font-size="8" fill="#999" font-style="italic">ZIP</text>
-
-  <!-- HWPX output box -->
-  <rect x="190" y="370" width="680" height="232" rx="3" fill="#fafaf5" stroke="#333" stroke-width="1.5"/>
-  <text x="530" y="392" text-anchor="middle" font-size="13" fill="#111" font-weight="600">output.hwpx</text>
-  <text x="530" y="406" text-anchor="middle" font-size="9" fill="#999" font-style="italic">HWPX = ZIP archive containing OOXML-like structure</text>
-  <line x1="205" y1="413" x2="855" y2="413" stroke="#ddd" stroke-width="0.5"/>
+  <rect x="190" y="350" width="680" height="212" rx="3" fill="#fafaf5" stroke="#333" stroke-width="1.5"/>
+  <text x="530" y="372" text-anchor="middle" font-size="13" fill="#111" font-weight="600">output.hwpx</text>
+  <text x="530" y="386" text-anchor="middle" font-size="9" fill="#999" font-style="italic">HWPX = ZIP archive containing OOXML-like structure</text>
+  <line x1="205" y1="393" x2="855" y2="393" stroke="#ddd" stroke-width="0.5"/>
 
   <!-- Contents/ -->
-  <text x="215" y="434" font-size="10" fill="#333" font-weight="600">Contents/</text>
+  <text x="215" y="414" font-size="10" fill="#333" font-weight="600">Contents/</text>
 
   <!-- section0.xml -->
-  <rect x="230" y="444" width="160" height="60" rx="2" fill="#eef4ee" stroke="#8a8" stroke-width="0.8"/>
-  <text x="310" y="462" text-anchor="middle" font-size="10" fill="#333" font-weight="600">section0.xml</text>
-  <text x="310" y="475" text-anchor="middle" font-size="8" fill="#666">hp:p  hp:tbl  hp:pic</text>
-  <text x="310" y="486" text-anchor="middle" font-size="8" fill="#666">hp:equation  hp:footNote</text>
-  <text x="310" y="497" text-anchor="middle" font-size="8" fill="#999" font-style="italic">document body</text>
+  <rect x="230" y="424" width="160" height="60" rx="2" fill="#eef4ee" stroke="#8a8" stroke-width="0.8"/>
+  <text x="310" y="442" text-anchor="middle" font-size="10" fill="#333" font-weight="600">section0.xml</text>
+  <text x="310" y="455" text-anchor="middle" font-size="8" fill="#666">hp:p  hp:tbl  hp:pic</text>
+  <text x="310" y="466" text-anchor="middle" font-size="8" fill="#666">hp:equation  hp:footNote</text>
+  <text x="310" y="477" text-anchor="middle" font-size="8" fill="#999" font-style="italic">document body</text>
 
   <!-- header.xml -->
-  <rect x="406" y="444" width="160" height="60" rx="2" fill="#eeeef4" stroke="#88a" stroke-width="0.8"/>
-  <text x="486" y="462" text-anchor="middle" font-size="10" fill="#333" font-weight="600">header.xml</text>
-  <text x="486" y="475" text-anchor="middle" font-size="8" fill="#666">fontfaces  charProperties</text>
-  <text x="486" y="486" text-anchor="middle" font-size="8" fill="#666">paraProperties  styles</text>
-  <text x="486" y="497" text-anchor="middle" font-size="8" fill="#999" font-style="italic">style definitions</text>
+  <rect x="406" y="424" width="160" height="60" rx="2" fill="#eeeef4" stroke="#88a" stroke-width="0.8"/>
+  <text x="486" y="442" text-anchor="middle" font-size="10" fill="#333" font-weight="600">header.xml</text>
+  <text x="486" y="455" text-anchor="middle" font-size="8" fill="#666">fontfaces  charProperties</text>
+  <text x="486" y="466" text-anchor="middle" font-size="8" fill="#666">paraProperties  styles</text>
+  <text x="486" y="477" text-anchor="middle" font-size="8" fill="#999" font-style="italic">style definitions</text>
 
   <!-- content.hpf -->
-  <rect x="582" y="444" width="160" height="60" rx="2" fill="#f4eee8" stroke="#a86" stroke-width="0.8"/>
-  <text x="662" y="462" text-anchor="middle" font-size="10" fill="#333" font-weight="600">content.hpf</text>
-  <text x="662" y="475" text-anchor="middle" font-size="8" fill="#666">metadata  manifest</text>
-  <text x="662" y="486" text-anchor="middle" font-size="8" fill="#666">image references</text>
-  <text x="662" y="497" text-anchor="middle" font-size="8" fill="#999" font-style="italic">package manifest</text>
+  <rect x="582" y="424" width="160" height="60" rx="2" fill="#f4eee8" stroke="#a86" stroke-width="0.8"/>
+  <text x="662" y="442" text-anchor="middle" font-size="10" fill="#333" font-weight="600">content.hpf</text>
+  <text x="662" y="455" text-anchor="middle" font-size="8" fill="#666">metadata  manifest</text>
+  <text x="662" y="466" text-anchor="middle" font-size="8" fill="#666">image references</text>
+  <text x="662" y="477" text-anchor="middle" font-size="8" fill="#999" font-style="italic">package manifest</text>
 
   <!-- BinData/ -->
-  <text x="215" y="528" font-size="10" fill="#333" font-weight="600">BinData/</text>
+  <text x="215" y="508" font-size="10" fill="#333" font-weight="600">BinData/</text>
 
   <!-- Images box -->
-  <rect x="230" y="536" width="160" height="40" rx="2" fill="#f8f4f0" stroke="#baa" stroke-width="0.8"/>
-  <text x="310" y="554" text-anchor="middle" font-size="10" fill="#333">images</text>
-  <text x="310" y="566" text-anchor="middle" font-size="8" fill="#999" font-style="italic">.png  .jpg  embedded</text>
+  <rect x="230" y="516" width="160" height="40" rx="2" fill="#f8f4f0" stroke="#baa" stroke-width="0.8"/>
+  <text x="310" y="534" text-anchor="middle" font-size="10" fill="#333">images</text>
+  <text x="310" y="546" text-anchor="middle" font-size="8" fill="#999" font-style="italic">.png  .jpg  embedded</text>
 
   <!-- Fonts box -->
-  <rect x="406" y="536" width="160" height="40" rx="2" fill="#f8f4f0" stroke="#baa" stroke-width="0.8"/>
-  <text x="486" y="554" text-anchor="middle" font-size="10" fill="#333">fonts</text>
-  <text x="486" y="566" text-anchor="middle" font-size="8" fill="#999" font-style="italic">NanumSquare  D2Coding  ...</text>
+  <rect x="406" y="516" width="160" height="40" rx="2" fill="#f8f4f0" stroke="#baa" stroke-width="0.8"/>
+  <text x="486" y="534" text-anchor="middle" font-size="10" fill="#333">fonts</text>
+  <text x="486" y="546" text-anchor="middle" font-size="8" fill="#999" font-style="italic">NanumSquare  D2Coding  ...</text>
 
   <!-- mimetype + META-INF -->
-  <rect x="582" y="536" width="160" height="40" rx="2" fill="#f0f0f0" stroke="#aaa" stroke-width="0.8"/>
-  <text x="662" y="554" text-anchor="middle" font-size="10" fill="#333">mimetype</text>
-  <text x="662" y="566" text-anchor="middle" font-size="8" fill="#999" font-style="italic">META-INF/container.xml</text>
+  <rect x="582" y="516" width="160" height="40" rx="2" fill="#f0f0f0" stroke="#aaa" stroke-width="0.8"/>
+  <text x="662" y="534" text-anchor="middle" font-size="10" fill="#333">mimetype</text>
+  <text x="662" y="546" text-anchor="middle" font-size="8" fill="#999" font-style="italic">META-INF/container.xml</text>
 
-  <!-- ═══════════ LEFT MARGIN: Annotations ═══════════ -->
-
-  <!-- Annotation: Two modes -->
-  <line x1="543" y1="192" x2="550" y2="192" stroke="#c33" stroke-width="0.5"/>
-  <line x1="500" y1="192" x2="543" y2="192" stroke="#c33" stroke-width="0.5" stroke-dasharray="2,2"/>
-  <text x="498" y="286" font-size="8" fill="#c33" text-anchor="end">Built-in:</text>
-  <text x="498" y="297" font-size="8" fill="#c33" text-anchor="end">raw XML strings</text>
-  <text x="498" y="313" font-size="8" fill="#999" text-anchor="end" font-style="italic">Reference-doc:</text>
-  <text x="498" y="324" font-size="8" fill="#999" text-anchor="end" font-style="italic">ElementTree parse</text>
-
-  <!-- Lineseg annotation -->
-  <text x="24" y="290" font-size="9" fill="#999" letter-spacing="1.5" font-variant="small-caps">KEY MODULES</text>
-  <line x1="24" y1="295" x2="160" y2="295" stroke="#ddd" stroke-width="0.5"/>
-  <text x="24" y="312" font-size="9" fill="#555">math_converter.py</text>
-  <text x="28" y="324" font-size="8" fill="#999" font-style="italic">LaTeX  to  HWP equation script</text>
-  <text x="24" y="342" font-size="9" fill="#555">lineseg.py</text>
-  <text x="28" y="354" font-size="8" fill="#999" font-style="italic">line break calculation for Mac</text>
-
-  <!-- Bottom-left: heritage note -->
-  <text x="24" y="406" font-size="8" fill="#bbb">Heritage</text>
-  <line x1="24" y1="410" x2="170" y2="410" stroke="#eee" stroke-width="0.5"/>
-  <text x="24" y="424" font-size="8" fill="#aaa">quarto-hwpx</text>
-  <text x="28" y="436" font-size="7.5" fill="#ccc" font-style="italic">math, lineseg, Korean fonts</text>
-  <text x="24" y="452" font-size="8" fill="#aaa">pypandoc-hwpx</text>
-  <text x="28" y="464" font-size="7.5" fill="#ccc" font-style="italic">inline styles, images, tables</text>
-
-  <!-- Namespace note at bottom -->
-  <line x1="24" y1="590" x2="876" y2="590" stroke="#eee" stroke-width="0.5"/>
-  <text x="24" y="608" font-size="8" fill="#bbb">XML namespace prefixes hp:, hs:, hc:, hh: are preserved as raw strings for HWP Mac compatibility.  Korean typography: NanumSquare + D2Coding + NimbusSanL + STIX Two.</text>
+  <!-- Bottom note -->
+  <line x1="24" y1="570" x2="876" y2="570" stroke="#eee" stroke-width="0.5"/>
+  <text x="24" y="576" font-size="8" fill="#bbb">XML namespace prefixes hp:, hs:, hc:, hh: are preserved as raw strings for HWP Mac compatibility.  Korean typography: NanumSquare + D2Coding + NimbusSanL + STIX Two.</text>
 </svg>

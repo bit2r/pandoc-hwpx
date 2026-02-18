@@ -1,11 +1,8 @@
-"""CLI entry point for pandoc-hwpx.
+"""Internal entry point for pandoc-hwpx (Lua filter 전용).
 
-Usage:
-    pandoc input.qmd -t json | python -m pandoc_hwpx -o output.hwpx
-    pandoc input.md -t json | python -m pandoc_hwpx -o output.hwpx --input-dir /path/to/input
-    pandoc input.md -t json | python -m pandoc_hwpx -o output.hwpx --reference-doc ref.hwpx
+Quarto의 hwpx-filter.lua가 pandoc.pipe()로 호출한다.
+사용자가 직접 실행하지 않는다.
 
-Or from a Lua filter:
     pandoc.pipe('python3', {'-m', 'pandoc_hwpx', '-o', path, '--input-dir', dir}, json_ast)
 """
 
@@ -26,9 +23,6 @@ def main():
     parser.add_argument(
         '--input-dir', default=None,
         help='Base directory for resolving relative image paths')
-    parser.add_argument(
-        '--reference-doc', default=None,
-        help='Reference .hwpx document for style/page setup inheritance')
     parser.add_argument(
         '--toc', action='store_true', default=False,
         help='Generate table of contents')
@@ -54,7 +48,6 @@ def main():
     # Run converter
     converter = PandocHwpxConverter(
         json_ast=ast,
-        reference_path=args.reference_doc,
         input_dir=input_dir,
         toc=args.toc,
     )

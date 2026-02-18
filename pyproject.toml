@@ -5,7 +5,7 @@ build-backend = "setuptools.backends._legacy:_Backend"
 [project]
 name = "pandoc-hwpx"
 version = "0.1.0"
-description = "Pandoc JSON AST to HWPX converter with full inline formatting, images, tables, math, and Korean typography"
+description = "Quarto extension: render .qmd to HWPX with Korean typography, math, tables, and images"
 readme = "README.md"
 requires-python = ">=3.9"
 license = {text = "MIT"}
@@ -29,9 +29,6 @@ dependencies = [
 Homepage = "https://github.com/bit2r/pandoc-hwpx"
 Repository = "https://github.com/bit2r/pandoc-hwpx"
 Issues = "https://github.com/bit2r/pandoc-hwpx/issues"
-
-[project.scripts]
-pandoc-hwpx = "pandoc_hwpx.__main__:main"
 
 [tool.setuptools.packages.find]
 include = ["pandoc_hwpx*"]
