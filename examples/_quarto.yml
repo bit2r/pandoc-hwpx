@@ -1,0 +1,7 @@
+project:
+  type: default
+
+format:
+  hwpx-docx:
+    toc: true
+    bibliography: references.bib

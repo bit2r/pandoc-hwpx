@@ -5,9 +5,11 @@ pypandoc-hwpx 아키텍처 + quarto-hwpx 한국어 타이포그래피 기능 통
 
 ## 프로젝트 구조
 
+단일 저장소, 이중 배포: `pip install pandoc-hwpx` (PyPI) + `quarto add bit2r/pandoc-hwpx` (GitHub)
+
 ```
 pandoc-hwpx/
-├── pandoc_hwpx/
+├── pandoc_hwpx/                  # Python 패키지 (pip install 대상)
 │   ├── __init__.py              # 패키지 초기화
 │   ├── __main__.py              # CLI: stdin JSON AST → HWPX 출력
 │   ├── converter.py             # 메인 엔진 (PandocHwpxConverter 클래스)
@@ -15,7 +17,14 @@ pandoc-hwpx/
 │   ├── lineseg.py               # linesegarray 계산기
 │   └── templates/
 │       ├── blank.hwpx           # 기본 HWPX 템플릿 (Skeleton.hwpx 기반)
-│       └── fonts/               # 번들 폰트 파일
+│       └── fonts/               # 번들 폰트 파일 (9.4MB)
+├── _extensions/hwpx/             # Quarto extension (quarto add 대상)
+│   ├── _extension.yml           # format: hwpx-docx
+│   └── hwpx-filter.lua          # Lua 필터 (67줄 래퍼)
+├── examples/                     # 예제/테스트 문서
+│   ├── example.qmd              # 예제 Quarto 문서
+│   ├── references.bib           # 참고문헌
+│   └── _quarto.yml              # 예제용 Quarto 설정
 ├── tests/
 │   └── fixtures/
 │       └── example.qmd          # 테스트 문서
@@ -24,10 +33,20 @@ pandoc-hwpx/
 └── README.md
 ```
 
+## 설치
+
+```bash
+# Python 패키지 설치 (PyPI)
+pip install pandoc-hwpx
+
+# Quarto extension 설치 (GitHub) — Quarto 사용 시에만
+quarto add bit2r/pandoc-hwpx
+```
+
 ## 사용법
 
 ```bash
-# 직접 변환
+# Standalone CLI — Pandoc JSON AST를 직접 변환
 pandoc input.qmd -t json | python -m pandoc_hwpx -o output.hwpx
 
 # 이미지 경로 기준 디렉토리 지정
@@ -36,9 +55,11 @@ pandoc input.qmd -t json | python -m pandoc_hwpx -o output.hwpx --input-dir /pat
 # 레퍼런스 문서 사용 (스타일/페이지 설정 상속)
 pandoc input.md -t json | python -m pandoc_hwpx -o output.hwpx --reference-doc ref.hwpx
 
-# Quarto 연동 (Lua 필터에서 호출)
-# hwpx-filter.lua에서:
-# pandoc.pipe('python3', {'-m', 'pandoc_hwpx', '-o', hwpx_path, '--input-dir', input_dir}, json_ast)
+# Quarto 연동 — _quarto.yml에서 format 지정
+# format:
+#   hwpx-docx:
+#     toc: true
+#     bibliography: references.bib
 ```
 
 ## 아키텍처

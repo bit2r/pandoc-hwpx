@@ -3,7 +3,7 @@
 *.hwpx
 *.json
 *.docx.hwpx-cleanup
-example_files/
+*_files/
 .quarto/
 
 # Python
