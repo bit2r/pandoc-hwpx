@@ -2,6 +2,7 @@
 *.docx
 *.hwpx
 !_extensions/hwpx/templates/blank.hwpx
+!examples/example.hwpx
 *.json
 *_files/
 .quarto/
