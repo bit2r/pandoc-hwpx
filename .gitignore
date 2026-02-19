@@ -1,6 +1,7 @@
 # Quarto render outputs
 *.docx
 *.hwpx
+!_extensions/hwpx/templates/blank.hwpx
 *.json
 *_files/
 .quarto/
