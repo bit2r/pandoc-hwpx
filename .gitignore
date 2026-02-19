@@ -26,3 +26,5 @@ Thumbs.db
 .luarc.json
 .vscode/
 .idea/
+
+/.luarc.json

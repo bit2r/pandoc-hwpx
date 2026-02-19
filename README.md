@@ -41,7 +41,7 @@ quarto add bit2r/pandoc-hwpx
 
 ```yaml
 format:
-  hwpx-docx:
+  hwpx:
     toc: true
     bibliography: references.bib
 ```
@@ -49,7 +49,7 @@ format:
 ### 렌더링
 
 ```bash
-quarto render example.qmd --to hwpx-docx
+quarto render example.qmd --to hwpx
 ```
 
 ---
