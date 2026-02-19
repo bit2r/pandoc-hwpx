@@ -2,18 +2,8 @@
 *.docx
 *.hwpx
 *.json
-*.docx.hwpx-cleanup
 *_files/
 .quarto/
-
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.egg-info/
-dist/
-build/
-.eggs/
 
 # Test outputs
 test_output.*

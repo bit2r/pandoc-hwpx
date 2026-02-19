@@ -38,8 +38,12 @@ local HEADING_SPACING = { [2]=800, [3]=600, [4]=400 }
 local CODE_CHAR_PR_ID = 10
 local CODE_FONT_REF   = 2
 
+local CAPTION_PARA_PR_ID = 20
+local CAPTION_CHAR_PR_ID = 11
+local CAPTION_CHAR_HEIGHT = 900
+
 local CHAR_HEIGHT_MAP = {
-  [0]=1000, [7]=2200, [8]=1600, [9]=1300, [10]=1000,
+  [0]=1000, [7]=2200, [8]=1600, [9]=1300, [10]=1000, [11]=CAPTION_CHAR_HEIGHT,
 }
 
 local TABLE_BORDER_FILL_ID = 3
@@ -76,10 +80,12 @@ local ORDERED_FORMATTERS = {
 -- ══════════════════════════════════════════════════════════════════════
 
 local para_id_counter = 3121190098
-local max_char_pr_id = CODE_CHAR_PR_ID
+local max_char_pr_id = CAPTION_CHAR_PR_ID
 local char_pr_cache = {}
 local images = {}
 local callout_used_types = {}
+local callout_types_from_source = {}
+local callout_index = 0
 local code_fold_enabled = false
 local list_depth = 0
 
@@ -367,9 +373,9 @@ local function make_callout_borderfill_xml(bf_id, border_color, bg_color)
     .. '<hh:topBorder type="NONE" width="0.12 mm" color="#000000"/>'
     .. '<hh:bottomBorder type="NONE" width="0.12 mm" color="#000000"/>'
     .. '<hh:diagonal type="NONE" width="0.12 mm" color="#000000"/>'
-    .. '<hh:fillBrush>'
+    .. '<hc:fillBrush>'
     .. '<hc:winBrush faceColor="' .. bg_color .. '" hatchColor="none" alpha="0"/>'
-    .. '</hh:fillBrush>'
+    .. '</hc:fillBrush>'
     .. '</hh:borderFill>'
 end
 
@@ -854,6 +860,8 @@ end
 
 -- Parse OpenXML <w:tbl> from gt output into HWPX <hp:tbl>
 local function parse_openxml_table(xml_str)
+  -- Normalize: Lua patterns don't match \n with '.'
+  xml_str = xml_str:gsub('\n', ' ')
   -- Extract rows: split by <w:tr> ... </w:tr>
   local rows = {}
   for tr_content in xml_str:gmatch('<w:tr[^>]*>(.-)</w:tr>') do
@@ -901,46 +909,54 @@ local function parse_openxml_table(xml_str)
     .. ' borderFillIDRef="3" noAdjust="0">',
     tbl_id, row_cnt, col_cnt)
 
-  -- Table body
-  parts[#parts+1] = '<hp:shapeOffset x="0" y="0"/>'
-  parts[#parts+1] = '<hp:sz width="' .. page_width .. '" height="0" widthRelTo="abs" heightRelTo="abs"/>'
-  parts[#parts+1] = '<hp:pos treatAsChar="1" affectLSpacing="0" holdAnchorAndSO="0" allowOverlap="0" flowWithText="1" textWrap="TOP_AND_BOTTOM" textFlow="BOTH_SIDES" />'
-  parts[#parts+1] = string.format('<hp:outMargin left="0" right="0" top="0" bottom="0"/>')
+  -- Table structure (matching handle_table format)
+  local total_height = 1800 * row_cnt
+  parts[#parts+1] = '<hp:sz width="' .. page_width .. '" widthRelTo="ABSOLUTE"'
+    .. ' height="' .. total_height .. '" heightRelTo="ABSOLUTE" protect="0"/>'
+  parts[#parts+1] = '<hp:pos treatAsChar="1" affectLSpacing="0" flowWithText="1"'
+    .. ' allowOverlap="0" holdAnchorAndSO="0" vertRelTo="PARA"'
+    .. ' horzRelTo="COLUMN" vertAlign="TOP" horzAlign="CENTER"'
+    .. ' vertOffset="0" horzOffset="0"/>'
+  parts[#parts+1] = '<hp:outMargin left="0" right="0" top="141" bottom="141"/>'
+  parts[#parts+1] = '<hp:inMargin left="0" right="0" top="0" bottom="0"/>'
 
   -- Build rows
   for ri, row in ipairs(rows) do
     parts[#parts+1] = '<hp:tr>'
 
-    -- Process cells
+    -- Process cells (matching handle_table child-element format)
     local col_idx = 0
     for _, cell in ipairs(row) do
       local cell_width = col_width * cell.colspan
-      local cell_addr = string.format('colAddr="%d" rowAddr="%d"', col_idx, ri - 1)
-      parts[#parts+1] = string.format(
-        '<hp:tc %s colSpan="%d" rowSpan="1" width="%d" height="0" header="0" hasMargin="0" protect="0" editable="0" dirty="0" borderFillIDRef="3">',
-        cell_addr, cell.colspan, cell_width)
+      local header_flag = ri == 1 and '1' or '0'
+      local sublist_id = unique_id()
 
-      -- Cell content
-      parts[#parts+1] = '<hp:subList id="' .. unique_id() .. '" textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="CENTER" linkListIDRef="0" linkListNextIDRef="0" textWidth="0" textHeight="0" hasTextRef="0" hasNumRef="0">'
-
-      local para_id = next_para_id()
-      local escaped_text = xml_escape(cell.text)
       local char_pr = 'charPrIDRef="0"'
-
-      -- First row gets bold
       if ri == 1 then
         local bold_id = get_builtin_char_pr_id(0, {bold = true})
         char_pr = 'charPrIDRef="' .. bold_id .. '"'
       end
 
+      local para_id = next_para_id()
+      local escaped_text = xml_escape(cell.text)
       local lineseg = compute_lineseg_xml(cell.text, CHAR_HEIGHT_NORMAL, cell_width)
-      parts[#parts+1] = string.format(
-        '<hp:p id="%s" paraPrIDRef="0" styleIDRef="0" pageBreak="0" columnBreak="0">',
-        para_id)
-      parts[#parts+1] = '<hp:run ' .. char_pr .. '><hp:secPr/><hp:t>' .. escaped_text .. '</hp:t></hp:run>'
-      parts[#parts+1] = '<hp:linesegarray>' .. lineseg .. '</hp:linesegarray></hp:p>'
-      parts[#parts+1] = '</hp:subList>'
-      parts[#parts+1] = '</hp:tc>'
+
+      parts[#parts+1] = '<hp:tc name="" header="' .. header_flag .. '" hasMargin="0"'
+        .. ' protect="0" editable="0" dirty="0" borderFillIDRef="3">'
+        .. '<hp:subList id="' .. sublist_id .. '"'
+        .. ' textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="CENTER"'
+        .. ' linkListIDRef="0" linkListNextIDRef="0" textWidth="0"'
+        .. ' textHeight="0" hasTextRef="0" hasNumRef="0">'
+        .. '<hp:p id="' .. para_id .. '" paraPrIDRef="0" styleIDRef="0"'
+        .. ' pageBreak="0" columnBreak="0" merged="0">'
+        .. '<hp:run ' .. char_pr .. '><hp:t>' .. escaped_text .. '</hp:t></hp:run>'
+        .. lineseg .. '</hp:p>'
+        .. '</hp:subList>'
+        .. '<hp:cellAddr colAddr="' .. col_idx .. '" rowAddr="' .. (ri - 1) .. '"/>'
+        .. '<hp:cellSpan colSpan="' .. cell.colspan .. '" rowSpan="1"/>'
+        .. '<hp:cellSz width="' .. cell_width .. '" height="1800"/>'
+        .. '<hp:cellMargin left="141" right="141" top="141" bottom="141"/>'
+        .. '</hp:tc>'
 
       col_idx = col_idx + cell.colspan
     end
@@ -1209,8 +1225,12 @@ local function handle_callout(block, indent_level)
     .. '<hp:outMargin left="0" right="0" top="141" bottom="141"/>'
     .. '<hp:inMargin left="0" right="0" top="0" bottom="0"/>'
     .. '<hp:tr>'
-    .. '<hp:tc name="" header="0" hasMargin="0"'
+    .. '<hp:tc name="" header="0" hasMargin="1"'
     .. ' protect="0" editable="0" dirty="0" borderFillIDRef="' .. bf_id .. '">'
+    .. '<hp:cellAddr colAddr="0" rowAddr="0"/>'
+    .. '<hp:cellSpan colSpan="1" rowSpan="1"/>'
+    .. '<hp:cellSz width="42520" height="0" sizeType="AT_LEAST"/>'
+    .. '<hp:cellMargin left="1134" right="567" top="283" bottom="283"/>'
     .. '<hp:subList id="' .. sublist_id .. '"'
     .. ' textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="TOP"'
     .. ' linkListIDRef="0" linkListNextIDRef="0" textWidth="0"'
@@ -1220,7 +1240,7 @@ local function handle_callout(block, indent_level)
     .. '<hp:cellAddr colAddr="0" rowAddr="0"/>'
     .. '<hp:cellSpan colSpan="1" rowSpan="1"/>'
     .. '<hp:cellSz width="' .. w .. '" height="1800"/>'
-    .. '<hp:cellMargin left="567" right="567" top="283" bottom="283"/>'
+    .. '<hp:cellMargin left="1134" right="567" top="283" bottom="283"/>'
     .. '</hp:tc>'
     .. '</hp:tr>'
     .. '</hp:tbl>'
@@ -1288,9 +1308,30 @@ process_blocks = function(blocks, indent_level)
       end
 
       if custom_type == 'Callout' then
-        -- Quarto custom callout node: wrap content in callout table
-        callout_used_types['note'] = true
-        local style = CALLOUT_STYLES['note']
+        -- Quarto custom Callout: type info lost in custom type conversion
+        -- Recover type from source file parsing (callout_types_from_source)
+        callout_index = callout_index + 1
+        local detected_type = callout_types_from_source[callout_index] or 'note'
+
+        -- Extract body from scaffold[2]
+        local body_blocks = {}
+        for ci, child in ipairs(block.content) do
+          local child_attrs = child.attr and child.attr.attributes or {}
+          if child_attrs['__quarto_custom_scaffold'] then
+            if ci >= 2 then
+              -- scaffold[2+] = body content
+              for _, b in ipairs(child.content or {}) do
+                body_blocks[#body_blocks+1] = b
+              end
+            end
+            -- scaffold[1] = title (empty in Quarto's Callout custom type)
+          else
+            body_blocks[#body_blocks+1] = child
+          end
+        end
+
+        callout_used_types[detected_type] = true
+        local style = CALLOUT_STYLES[detected_type]
         local bf_id = tostring(style.border_fill_id)
 
         -- Build cell content: title (bold) + body from scaffolds
@@ -1298,8 +1339,10 @@ process_blocks = function(blocks, indent_level)
         local bold_id = get_builtin_char_pr_id('0', {BOLD=true})
         cell_parts[#cell_parts+1] = make_paragraph_xml(style.title, bold_id)
 
-        local body_xml_parts = process_blocks(block.content, 0)
-        for _, p in ipairs(body_xml_parts) do cell_parts[#cell_parts+1] = p end
+        if #body_blocks > 0 then
+          local body_xml_parts = process_blocks(body_blocks, 0)
+          for _, p in ipairs(body_xml_parts) do cell_parts[#cell_parts+1] = p end
+        end
 
         local cell_content = table.concat(cell_parts, '\n')
 
@@ -1326,8 +1369,12 @@ process_blocks = function(blocks, indent_level)
           .. '<hp:outMargin left="0" right="0" top="141" bottom="141"/>'
           .. '<hp:inMargin left="0" right="0" top="0" bottom="0"/>'
           .. '<hp:tr>'
-          .. '<hp:tc name="" header="0" hasMargin="0"'
+          .. '<hp:tc name="" header="0" hasMargin="1"'
           .. ' protect="0" editable="0" dirty="0" borderFillIDRef="' .. bf_id .. '">'
+          .. '<hp:cellAddr colAddr="0" rowAddr="0"/>'
+          .. '<hp:cellSpan colSpan="1" rowSpan="1"/>'
+          .. '<hp:cellSz width="42520" height="0" sizeType="AT_LEAST"/>'
+          .. '<hp:cellMargin left="1134" right="567" top="283" bottom="283"/>'
           .. '<hp:subList id="' .. sublist_id .. '"'
           .. ' textDirection="HORIZONTAL" lineWrap="BREAK" vertAlign="TOP"'
           .. ' linkListIDRef="0" linkListNextIDRef="0" textWidth="0"'
@@ -1337,7 +1384,7 @@ process_blocks = function(blocks, indent_level)
           .. '<hp:cellAddr colAddr="0" rowAddr="0"/>'
           .. '<hp:cellSpan colSpan="1" rowSpan="1"/>'
           .. '<hp:cellSz width="' .. w .. '" height="1800"/>'
-          .. '<hp:cellMargin left="567" right="567" top="283" bottom="283"/>'
+          .. '<hp:cellMargin left="1134" right="567" top="283" bottom="283"/>'
           .. '</hp:tc>'
           .. '</hp:tr>'
           .. '</hp:tbl>'
@@ -1375,8 +1422,8 @@ process_blocks = function(blocks, indent_level)
       if block.caption and block.caption.long and #block.caption.long > 0 then
         local cap_text = pandoc.utils.stringify(block.caption.long)
         if cap_text ~= '' then
-          local italic_id = get_builtin_char_pr_id('0', {ITALIC=true})
-          xml_parts[#xml_parts+1] = make_paragraph_xml(cap_text, italic_id)
+          xml_parts[#xml_parts+1] = make_paragraph_xml(
+            cap_text, tostring(CAPTION_CHAR_PR_ID), '0', tostring(CAPTION_PARA_PR_ID))
         end
       end
 
@@ -1400,7 +1447,13 @@ process_blocks = function(blocks, indent_level)
       -- Parse OpenXML tables (e.g. gt output rendered for docx)
       local tbl_xml = parse_openxml_table(block.text)
       if tbl_xml then
-        xml_parts[#xml_parts+1] = tbl_xml
+        -- Wrap in <hp:p><hp:run> — required for 한글 to render the table
+        local pid = next_para_id()
+        xml_parts[#xml_parts+1] = '<hp:p id="' .. pid .. '" paraPrIDRef="0" styleIDRef="0"'
+          .. ' pageBreak="0" columnBreak="0" merged="0">'
+          .. '<hp:run charPrIDRef="0">'
+          .. tbl_xml
+          .. '<hp:t></hp:t></hp:run></hp:p>'
       end
 
     elseif t == 'RawBlock' and block.format == 'html' and block.text:find('<table') then
@@ -1482,7 +1535,7 @@ local function build_toc_block(blocks)
 
   for _, h in ipairs(headings) do
     local relative = h.level - min_level
-    local indent = ('\u{3000}'):rep(relative)
+    local indent = ('\u{3000}'):rep(relative * 2)
     if relative == 0 then
       local bold_id = get_builtin_char_pr_id('0', {BOLD=true})
       parts[#parts+1] = make_paragraph_xml(indent .. h.text, bold_id)
@@ -1538,6 +1591,9 @@ local function update_header_xml(header_xml)
   -- Code charPr
   new_charpr = new_charpr .. make_charpr_xml(CODE_CHAR_PR_ID, 1000, {font_ref=CODE_FONT_REF})
 
+  -- Caption charPr (9pt italic)
+  new_charpr = new_charpr .. make_charpr_xml(CAPTION_CHAR_PR_ID, CAPTION_CHAR_HEIGHT, {italic=true, font_ref=0})
+
   -- Dynamic format charPr entries
   for _, entry in pairs(char_pr_cache) do
     local base_id = tonumber(entry.base_id) or 0
@@ -1559,7 +1615,7 @@ local function update_header_xml(header_xml)
   -- Update itemCnt
   local cache_count = 0
   for _ in pairs(char_pr_cache) do cache_count = cache_count + 1 end
-  local total = 7 + #HEADING_CHAR_PROPS + 1 + cache_count
+  local total = 7 + #HEADING_CHAR_PROPS + 1 + 1 + cache_count  -- +1 for caption charPr
   header_xml = header_xml:gsub(
     '(<hh:charProperties%s+itemCnt=")%d+(")', '%1' .. total .. '%2')
 
@@ -1579,11 +1635,66 @@ local function update_header_xml(header_xml)
   header_xml = header_xml:gsub(
     '(<hh:borderFills%s+itemCnt=")%d+(")', '%1' .. bf_count .. '%2')
 
-  -- Heading spacing
+  -- Heading spacing (position-based search to handle multiline XML)
   for para_pr_id, prev_val in pairs(HEADING_SPACING) do
+    local tag = '<hh:paraPr%s+id="' .. para_pr_id .. '"'
+    local s = header_xml:find(tag)
+    if s then
+      local e = header_xml:find('</hh:paraPr>', s)
+      if e then
+        local section = header_xml:sub(s, e + 12)
+        local patched = section:gsub(
+          '<hc:prev%s+value="0"', '<hc:prev value="' .. prev_val .. '"')
+        header_xml = header_xml:sub(1, s-1) .. patched .. header_xml:sub(e + 13)
+      end
+    end
+  end
+
+  -- Caption paraPr (center alignment, spacing) — exact template structure
+  local caption_para_pr = '<hh:paraPr id="' .. CAPTION_PARA_PR_ID .. '"'
+    .. ' tabPrIDRef="0" condense="0" fontLineHeight="0" snapToGrid="1"'
+    .. ' suppressLineNumbers="0" checked="0" textDir="LTR">'
+    .. '<hh:align horizontal="CENTER" vertical="BASELINE"/>'
+    .. '<hh:heading type="NONE" idRef="0" level="0"/>'
+    .. '<hh:breakSetting breakLatinWord="KEEP_WORD" breakNonLatinWord="BREAK_WORD"'
+    .. ' widowOrphan="0" keepWithNext="0" keepLines="0"'
+    .. ' pageBreakBefore="0" lineWrap="BREAK"/>'
+    .. '<hh:autoSpacing eAsianEng="0" eAsianNum="0"/>'
+    .. '<hp:switch>'
+    .. '<hp:case hp:required-namespace="http://www.hancom.co.kr/hwpml/2016/HwpUnitChar">'
+    .. '<hh:margin>'
+    .. '<hc:intent value="0" unit="HWPUNIT"/>'
+    .. '<hc:left value="0" unit="HWPUNIT"/>'
+    .. '<hc:right value="0" unit="HWPUNIT"/>'
+    .. '<hc:prev value="200" unit="HWPUNIT"/>'
+    .. '<hc:next value="200" unit="HWPUNIT"/>'
+    .. '</hh:margin>'
+    .. '<hh:lineSpacing type="PERCENT" value="160" unit="HWPUNIT"/>'
+    .. '</hp:case>'
+    .. '<hp:default>'
+    .. '<hh:margin>'
+    .. '<hc:intent value="0" unit="HWPUNIT"/>'
+    .. '<hc:left value="0" unit="HWPUNIT"/>'
+    .. '<hc:right value="0" unit="HWPUNIT"/>'
+    .. '<hc:prev value="400" unit="HWPUNIT"/>'
+    .. '<hc:next value="400" unit="HWPUNIT"/>'
+    .. '</hh:margin>'
+    .. '<hh:lineSpacing type="PERCENT" value="160" unit="HWPUNIT"/>'
+    .. '</hp:default>'
+    .. '</hp:switch>'
+    .. '<hh:border borderFillIDRef="2" offsetLeft="0" offsetRight="0"'
+    .. ' offsetTop="0" offsetBottom="0" connect="0" ignoreMargin="0"/>'
+    .. '</hh:paraPr>'
+  local pp_close = '</hh:paraProperties>'
+  local pp_pos = header_xml:find(pp_close)
+  if pp_pos then
+    header_xml = header_xml:sub(1, pp_pos - 1) .. caption_para_pr .. pp_close .. header_xml:sub(pp_pos + #pp_close)
+    -- Update paraProperties itemCnt
     header_xml = header_xml:gsub(
-      '(<hh:paraPr%s+id="' .. para_pr_id .. '"[^>]*>.-)<hc:prev%s+value="0"',
-      '%1<hc:prev value="' .. prev_val .. '"')
+      '(<hh:paraProperties%s+itemCnt=")(%d+)(")',
+      function(pre, cnt, post)
+        return pre .. (tonumber(cnt) + 1) .. post
+      end)
   end
 
   return header_xml
@@ -1749,12 +1860,41 @@ function Pandoc(doc)
 
   -- Reset state for this conversion
   para_id_counter = 3121190098
-  max_char_pr_id = CODE_CHAR_PR_ID
+  max_char_pr_id = CAPTION_CHAR_PR_ID
   char_pr_cache = {}
   images = {}
   callout_used_types = {}
+  callout_types_from_source = {}
+  callout_index = 0
   list_depth = 0
   math.randomseed(os.time())
+
+  -- Parse callout types from source file (QMD or knit.md)
+  -- Quarto's custom Callout Div loses type info; recover from source syntax
+  local source_candidates = {}
+  if PANDOC_STATE.input_files and #PANDOC_STATE.input_files > 0 then
+    source_candidates[#source_candidates+1] = PANDOC_STATE.input_files[1]
+  end
+  local base_name = hwpx_path:match('([^/\\]+)%.hwpx$') or ''
+  if base_name ~= '' then
+    source_candidates[#source_candidates+1] = input_dir .. base_name .. '.qmd'
+  end
+  for _, src_path in ipairs(source_candidates) do
+    local src_content = read_file(src_path)
+    if src_content then
+      for ctype in src_content:gmatch('::: *{%.callout%-(%w+)') do
+        if CALLOUT_STYLES[ctype] then
+          callout_types_from_source[#callout_types_from_source+1] = ctype
+        end
+      end
+      if #callout_types_from_source > 0 then
+        io.stderr:write('[hwpx] Detected ' .. #callout_types_from_source
+          .. ' callout types from source: '
+          .. table.concat(callout_types_from_source, ', ') .. '\n')
+        break
+      end
+    end
+  end
 
   -- Extract metadata
   local title, subtitle, author, date_str = extract_metadata(doc)

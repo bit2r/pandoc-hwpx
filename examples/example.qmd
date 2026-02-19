@@ -357,7 +357,7 @@ ggplot(npv_sim, aes(x = 할인율 * 100, y = NPV)) +
   geom_vline(xintercept = 3.5, linetype = "dotted", color = "red") +
   annotate("text", x = 4, y = max(npv_sim$NPV) * 0.9,
            label = "현재 할인율\n(3.5%)", color = "red", size = 3) +
-  geom_point(data = npv_sim |> filter(abs(할인율 - 0.035) < 0.003),
+  geom_point(data = npv_sim |> dplyr::filter(abs(할인율 - 0.035) < 0.003),
              color = "red", size = 3) +
   labs(x = "할인율 (%)", y = "NPV (백만원)") +
   theme_minimal(base_family = "NanumSquare") +
