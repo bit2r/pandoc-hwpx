@@ -41,7 +41,7 @@ quarto add bit2r/pandoc-hwpx
 
 ```yaml
 format:
-  hwpx:
+  hwpx-docx:
     toc: true
     bibliography: references.bib
 ```
@@ -49,21 +49,21 @@ format:
 ### 렌더링
 
 ```bash
-quarto render example.qmd --to hwpx
+quarto render example.qmd --to hwpx-docx
 ```
 
 ---
 
 ## Converter Engine
 
-`hwpx-filter.lua`는 약 1,200줄의 순수 Lua 필터로,
+`hwpx-filter.lua`는 약 1,800줄의 순수 Lua 필터로,
 Pandoc AST를 5단계에 걸쳐 HWPX로 변환한다.
 
 | Stage | Operation | Detail |
 |:-----:|:----------|:-------|
-| 1 | Meta extraction | title, author, date |
+| 1 | Meta extraction | title, author, date, citeproc |
 | 2 | Template loading | `blank.hwpx` 내장 템플릿 |
-| 3 | Block processing | Header, Para, Table, CodeBlock, List, BlockQuote, ... |
+| 3 | Block processing | Header, Table, Callout, Figure, List, CodeBlock, ... |
 | 4 | Inline formatting | Bold, Italic, Code, Link, Image, Math, Footnote |
 | 5 | XML assembly + ZIP | section0.xml + header.xml + content.hpf → zip |
 
@@ -79,13 +79,18 @@ Pandoc AST를 5단계에 걸쳐 HWPX로 변환한다.
 | `Para`, `Plain` | `<hp:p>` + 인라인 서식 + linesegarray |
 | `CodeBlock` | D2Coding, 줄별 `<hp:p>` |
 | `Table` | `<hp:tbl>`, rowspan/colspan, occupied-cell 추적 |
-| `BulletList` | 텍스트 prefix |
-| `OrderedList` | 텍스트 prefix |
+| `BulletList` | 레벨별 마커 (●→○→■→▪) + 중첩 들여쓰기 |
+| `OrderedList` | 레벨별 번호 (1.→가.→(1)→(가)) + 중첩 들여쓰기 |
 | `BlockQuote` | 전각 공백 들여쓰기 |
 | `DefinitionList` | 용어 + 들여쓰기 정의 |
 | `HorizontalRule` | 구분선 |
 | `Div` | Quarto 셀 래퍼 투명 패스스루 |
+| `Div(Callout)` | 5가지 타입별 배경색 테이블 (note/warning/tip/caution/important) |
+| `Div(FloatRefTarget)` | Quarto Figure → 이미지 + 캡션 |
+| `Figure` | Pandoc 네이티브 Figure → 이미지 + 기울임 캡션 |
 | `LineBlock` | 줄별 단락 생성 |
+| `RawBlock(openxml)` | gt `<w:tbl>` → `<hp:tbl>` OpenXML 파서 |
+| `RawBlock(html)` | HTML `<table>` → `pandoc.read` → HWPX 변환 |
 
 ### Inlines
 
@@ -103,17 +108,21 @@ Pandoc AST를 5단계에 걸쳐 HWPX로 변환한다.
 | `Quoted` | 유니코드 인용부호 |
 | `Superscript` | charPr supscript |
 | `Subscript` | charPr subscript |
+| `Cite` | citeproc 처리 후 텍스트 통과 |
+| `Span` | 콘텐츠 투명 패스스루 |
 
-### Quarto Code Output
+### Quarto Features
 
-Quarto가 실행한 R/Python 코드의 결과물도 변환한다.
-
-| Output | HWPX |
-|:-------|:-----|
-| ggplot / matplotlib image | `<hp:pic>` 임베딩 |
-| kable / gt table | `<hp:tbl>` 변환 |
-| text output | D2Coding 코드블록 |
-| source code | D2Coding 코드블록 |
+| Feature | HWPX |
+|:--------|:-----|
+| TOC (`toc: true`) | 목차 자동 생성 |
+| Bibliography | citeproc → 본문 인용 + 참고문헌 목록 |
+| code-fold (`code-fold: true`) | `.cell-code` Div 생략 |
+| R 코드 실행 (knitr) | 결과(표/그림)를 HWPX에 포함 |
+| Python 코드 실행 (jupyter) | 결과를 HWPX에 포함 |
+| gt 테이블 | OpenXML `<w:tbl>` 파싱 → `<hp:tbl>` |
+| ggplot2 / matplotlib | PNG 이미지 임베딩 |
+| docx 최소화 | HWPX 성공 시 빈 docx (~10KB) 반환 |
 
 ---
 
@@ -139,9 +148,12 @@ Quarto가 실행한 R/Python 코드의 결과물도 변환한다.
 pandoc-hwpx/
 ├── _extensions/hwpx/         Quarto extension
 │   ├── _extension.yml
-│   ├── hwpx-filter.lua       pure Lua engine, ~1,200 lines
+│   ├── hwpx-filter.lua       pure Lua engine, ~1,800 lines
 │   └── templates/            blank.hwpx + bundled fonts
 ├── examples/                 example documents
+│   ├── example.qmd           종합 테스트 (R, gt, ggplot2, 수식, 인용)
+│   └── references.bib        참고문헌
+├── man/figures/              architecture diagram
 └── tests/
 ```
 
